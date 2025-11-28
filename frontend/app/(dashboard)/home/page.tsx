@@ -1,10 +1,10 @@
 // app/home/page.tsx
 
-import Header from '@/components//dashboard/Header'
-import AnnouncementBanner from '@/components/dashboard/Announcementbanner'
-import CreateOptionsCard from '@/components/dashboard/CreateOptionsCard'
-import ResourcesSection from '@/components/dashboard/ResourcesSection'
-import FeedbackButton from '@/components/dashboard/Feedbackbutton'
+import Header from '@/components/home/Header'
+import AnnouncementBanner from '@/components/home/Announcementbanner'
+import CreateOptionsCard from '@/components/home/CreateOptionsCard'
+import ResourcesSection from '@/components/home/ResourcesSection'
+import FeedbackButton from '@/components/home/Feedbackbutton'
 
 export default function HomePage() {
   return (
