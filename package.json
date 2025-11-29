@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "dev": "cd frontend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev"
+  },
   "dependencies": {
     "react-router-dom": "^7.9.6",
     "reacticon": "^0.0.1"
