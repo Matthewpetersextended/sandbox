@@ -4,6 +4,7 @@
     "dev:frontend": "cd frontend && npm run dev"
   },
   "dependencies": {
+    "firebase": "^12.6.0",
     "react-router-dom": "^7.9.6",
     "reacticon": "^0.0.1"
   }
