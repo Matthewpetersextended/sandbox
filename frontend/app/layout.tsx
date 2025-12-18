@@ -1,9 +1,11 @@
+//frontend/app/layout.tsx
+
 import type { Metadata } from "next";
-import "./globals.css";
+import "./global.css";  // or "./globals.css" if you rename the file
 
 export const metadata: Metadata = {
-  title: "Teacher Pro - Make every class engaging",
-  description: "Comprehensive educational tools that enable teachers to create engaging content, manage classrooms effectively, and support every student's learning journey.",
+  title: "Mamut - Own Your Pipeline Forever",
+  description: "Launch outbound in <1 week. Build to permanent ownership. Own your pipeline forever.",
 };
 
 export default function RootLayout({
