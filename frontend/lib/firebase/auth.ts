@@ -1,5 +1,7 @@
+// frontend/lib/firebase/auth.ts
+
 import { auth } from './config';
-import { 
+import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
@@ -23,4 +25,21 @@ export const logOut = async () => {
 
 export const onAuthChange = (callback: (user: User | null) => void) => {
   return onAuthStateChanged(auth, callback);
+};
+
+// Create a client object similar to Supabase pattern
+export const createClient = () => {
+  return {
+    auth: {
+      getUser: async () => {
+        return new Promise<{ data: { user: User | null } }>((resolve) => {
+          const unsubscribe = onAuthStateChanged(auth, (user) => {
+            unsubscribe();
+            resolve({ data: { user } });
+          });
+        });
+      },
+      onAuthStateChange: onAuthStateChanged
+    }
+  };
 };

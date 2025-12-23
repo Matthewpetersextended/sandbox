@@ -1,4 +1,4 @@
-// app/home/page.tsx
+// app/(dashboard)home/page.tsx
 
 import Header from '@/components/home/Header'
 import AnnouncementBanner from '@/components/home/Announcementbanner'

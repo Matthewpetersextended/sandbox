@@ -1,9 +1,10 @@
 // app/layout.tsx
 
-
+import { EnvVarWarning } from "@/components/website/env-var-warning";
 import { ConditionalNav } from "@/components/website/conditional-nav";
-
+import { hasEnvVars } from "@/lib/firebase/check-env-vars";
 import { Geist } from "next/font/google";
+import { ThemeProvider } from "@/components/theme-provider";
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
@@ -55,8 +56,19 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
       <body className="bg-background text-foreground">
-        <ConditionalNav />
-        {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <ConditionalNav />
+
+          <main className="min-h-screen flex flex-col">
+            {!hasEnvVars ? <EnvVarWarning /> : null}
+            {children}
+          </main>
+        </ThemeProvider>
       </body>
     </html>
   );
