@@ -6,7 +6,7 @@ import { hasEnvVars } from "@/lib/firebase/check-env-vars";
 import { Geist } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import type { Metadata, Viewport } from "next";
-import "./globals.css";
+import "./global.css";
 
 const geistSans = Geist({
   display: "swap",

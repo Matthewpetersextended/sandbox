@@ -9,14 +9,24 @@ import {
   User
 } from 'firebase/auth';
 
-export const signUp = async (email: string, password: string) => {
-  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-  return userCredential.user;
+export const signUp = async (email: string, password: string, name?: string) => {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    // TODO: If you need to store the name, you can update the user profile here
+    // await updateProfile(userCredential.user, { displayName: name });
+    return { user: userCredential.user, error: null };
+  } catch (error: any) {
+    return { user: null, error: error.message };
+  }
 };
 
 export const signIn = async (email: string, password: string) => {
-  const userCredential = await signInWithEmailAndPassword(auth, email, password);
-  return userCredential.user;
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    return { user: userCredential.user, error: null };
+  } catch (error: any) {
+    return { user: null, error: error.message };
+  }
 };
 
 export const logOut = async () => {

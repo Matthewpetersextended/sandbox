@@ -17,7 +17,6 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import GoogleSignInButton from '@/components/GoogleSignInButton'
 
 type SignUpFormData = {
   name: string
@@ -200,19 +199,6 @@ export default function SignUpPage() {
               </Button>
             </form>
           </Form>
-
-          {/* Divider */}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Or continue with</span>
-            </div>
-          </div>
-
-          {/* Google Sign In */}
-          <GoogleSignInButton />
 
           {/* Sign In Link */}
           <p className="mt-6 text-center text-sm text-gray-600">
