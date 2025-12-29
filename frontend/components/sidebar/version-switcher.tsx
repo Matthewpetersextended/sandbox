@@ -1,3 +1,5 @@
+//frontend/components/sidebar/version-switcher.tsx
+
 "use client"
 
 import * as React from "react"

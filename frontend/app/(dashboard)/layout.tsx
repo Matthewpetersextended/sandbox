@@ -5,12 +5,12 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { EnvVarWarning } from "@/components/env-var-warning";
-import { AppSidebar } from "@/components/sidebar/app-sidebar"; // Named import instead of default
+import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { 
   SidebarProvider, 
   SidebarInset, 
   SidebarTrigger 
-} from "@/components/ui/sidebar"; // Add shadcn sidebar imports
+} from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/seperator";
 import { hasEnvVars } from "@/lib/firebase/check-env-vars";
 import { Toaster } from "@/components/ui/sonner";
