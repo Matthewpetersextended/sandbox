@@ -1,4 +1,4 @@
-//app/tools/Lessons/create/page.tsx
+//frontend/app/(dashboard)/lessons/create/page.tsx
 
 "use client";
 

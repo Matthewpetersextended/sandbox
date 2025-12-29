@@ -1,4 +1,4 @@
-// frontend/app/(dashboard)/lessons/page.tsx
+// app/tools/Lessons/page.tsx 
 
 "use client";
 
@@ -6,8 +6,12 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, RefreshCw, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import LessonCard from "@/components/lessons/LessonCard";
-
+import LessonCard from "@/app/(dashboard)/lessons/lessoncards";
+import { 
+  fetchLessons, 
+  handleLessonError,
+  type Lesson 
+} from "@/app/tools/Calendar/utils/lessonApi";
 
 const LessonsPage = () => {
   const router = useRouter();
@@ -45,7 +49,7 @@ const LessonsPage = () => {
       return [];
     }
     // Extract unique segment types (projectName)
-    const types = lesson.segments.map(seg => seg.projectName);
+    const types = lesson.segments.map((seg: { projectName: any; }) => seg.projectName);
     return Array.from(new Set(types));
   };
 
@@ -165,7 +169,7 @@ const LessonsPage = () => {
       lesson.author
         ? lesson.author
             .split(" ")
-            .map((n) => n[0])
+            .map((n: any[]) => n[0])
             .join("")
             .toUpperCase()
         : "?"
