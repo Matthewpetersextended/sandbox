@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { signIn } from '@/lib/firebase/auth'
 import { useRouter } from 'next/navigation'
+import { useAuth } from '@/lib/hooks/useAuth'
 import Link from 'next/link'
 import {
   Form,
@@ -23,10 +24,13 @@ type SignInFormData = {
   password: string
 }
 
-export default function SignInPage() {
+export default function SignInForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+  
+  // Redirect to home if already authenticated
+  const { loading: authLoading } = useAuth({ redirectIfFound: '/home' })
 
   const form = useForm<SignInFormData>({
     defaultValues: {
@@ -47,8 +51,17 @@ export default function SignInPage() {
       return
     }
 
-    // Redirect to dashboard or home page after successful sign in
-    router.push('/dashboard')
+    // Redirect to home after successful sign in
+    router.push('/home')
+  }
+
+  // Show loading while checking auth state
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-gray-600">Loading...</div>
+      </div>
+    )
   }
 
   return (

@@ -1,149 +1,131 @@
 # AI Presentation Maker - Copilot Instructions
 
-## Project Architecture
+Purpose: concise, codebase-specific guidance to onboard AI coding agents.
 
-**Full-stack AI presentation generation platform**: NextJS frontend + FastAPI backend with PostgreSQL and Redis.
+## Quick Overview
 
-### Service Boundaries
-- **Backend** (`/backend`): FastAPI REST API serving presentation CRUD, AI generation workflows, Firebase auth
-- **Frontend** (`/frontend`): Next.js app with Auth/Dashboard/Website route groups, sidebar navigation, Radix UI components
-- **Data Layer**: PostgreSQL (presentations, user data) + Redis (caching) via Docker Compose
-- **Auth**: Firebase Authentication (email/password signup, token verification)
-- **AI Integration**: Anthropic API for slide content generation
+**Stack**: Next.js (`/frontend`) + FastAPI (`/backend`) + Postgres + Redis. Firebase auth; Anthropic (Claude Sonnet 4) for AI generation.
 
-### Data Flow
-1. User authenticates via Firebase → receives ID token
-2. Frontend sends token in Authorization header to FastAPI
-3. FastAPI verifies token via `firebase_admin.auth.verify_id_token()`
-4. Authenticated endpoints extract `user_id` from decoded token via `get_current_user_id()` dependency
-5. Presentations scoped per user: `.filter(Presentation.user_id == user_id)`
+**Key directories**:
+- Backend: `backend/app/api/`, `models/`, `schemas/`, `core/` (auth), `services/`, `workers/`
+- Frontend: `app/` (routes: auth, dashboard, website), `components/`, `lib/` (Firebase, API)
 
-## Critical Developer Workflows
+## Local Development (Commands)
 
-### Local Development
+**Infrastructure**:
 ```bash
-# Root workspace (runs frontend in watch mode)
-npm run dev
-
-# Only frontend
-cd frontend && npm run dev
-
-# Services (must be running)
-docker-compose up -d
+docker-compose up -d  # postgres + redis
 ```
 
-### Database Migrations
-Using Alembic (configured in `/backend/alembic/`):
+**Backend**:
 ```bash
-# No migration tool calls yet—schema managed via SQLAlchemy `Base.metadata.create_all()` in `app/database.py:init_db()`
-# Manual migration workflow TBD
+cd backend && python -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+# DB tables auto-created on startup via init_db()
 ```
 
-### Configuration
-- **Backend**: `backend/app/config.py` uses Pydantic `BaseSettings` reading env vars
-  - Key vars: `DATABASE_URL`, `REDIS_URL`, `ANTHROPIC_API_KEY`, `FIREBASE_CREDENTIALS_PATH`
-  - CORS: hardcoded to `["http://localhost:3000", "http://localhost:8000"]` (update for production)
-- **Frontend**: Next.js env vars in root `/frontend/.env.local` or injected at build
-  - Firebase SDK initialized in `lib/firebase/config.ts`
+**Frontend**:
+```bash
+cd frontend && npm install && npm run dev
+# Or from repo root: npm run dev
+```
 
-## Code Structure & Patterns
+**Celery worker** (for async tasks):
+```bash
+# When implemented: celery -A app.workers.worker worker --loglevel=info
+# Broker/result backend configured in .env (CELERY_BROKER_URL, CELERY_RESULT_BACKEND)
+```
 
-### Backend (FastAPI)
-**Entry point**: `backend/app/main.py` → FastAPI app with CORS middleware, startup init
-- **Models** (`app/models/`): SQLAlchemy ORM classes (e.g., `Presentation` with UUID id, `user_id` foreign key)
-- **Schemas** (`app/schemas/`): Pydantic models for request/response validation (`PresentationCreate`, `PresentationResponse`)
-- **API Routes** (`app/api/v1/`): Router modules (presentations.py) with dependency injection
-  - Pattern: `@router.get("/{id}", response_model=Schema)` with `db: Session = Depends(get_db)`
-- **Auth** (`app/core/auth.py`): Firebase token verification via HTTPBearer security
-- **Database** (`app/database.py`): SQLAlchemy engine, SessionLocal factory, Base declarative class
-- **Config** (`app/config.py`): Settings class centralizes all env vars with defaults
+## Environment & Configuration
 
-**API Response Pattern**: Use Pydantic response models with `from_attributes = True` for ORM → dict serialization
+**Backend** (`backend/.env.*`):
+- `DATABASE_URL`, `REDIS_URL`, `FIREBASE_CREDENTIALS_PATH`, `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`
+- CORS: hardcoded to `["http://localhost:3000", "http://localhost:8000"]` in `settings.BACKEND_CORS_ORIGINS` — update for production
+- See `backend/app/config.py` for all defaults and feature flags (FERPA/COPPA, moderation, rate limits)
 
-### Frontend (Next.js App Router)
-**Route Groups**:
-- `(auth)/`: Public signup/signin pages
-- `(dashboard)/`: Protected user workspace (lessons, activity sheets, settings, home)
-- `(website)/`: Public marketing pages (about, pricing, help)
+**Frontend** (`NEXT_PUBLIC_*` env vars):
+- Firebase config in `frontend/lib/firebase/config.ts` reads from env
+- Backend URL: set `NEXT_PUBLIC_BACKEND_URL` for API calls
 
-**Layout Convention** (`app/(dashboard)/layout.tsx`):
-- Client component managing SidebarProvider state
-- Hides sidebar for editor routes (`isEditorRoute` check)
-- Toaster (Sonner) at root for toast notifications
+## Core Patterns
 
-**Component Structure** (`components/`):
-- `ui/`: Radix UI primitives (button, card, sidebar, form, etc.)
-- `auth/`: SignInForm, SignUpForm, GoogleAuthButton components
-- `sidebar/`: AppSidebar (navigation), sidebar.tsx (Radix wrapper)
-- `layout/`: DashboardLayout, PublicNav, Footer (layout shells)
-- `lessons/`, `settings/`, `home/`: Feature-specific components
+### User Isolation (Critical)
+- Every endpoint filters by `user_id` (extracted from Firebase ID token in `get_current_user()`)
+- Example: `db.query(Presentation).filter(Presentation.user_id == user_id)`
+- **Rule**: Always scope queries by user — no cross-user data leaks
 
-**Firebase Auth Pattern** (`lib/firebase/auth.ts`):
-```typescript
-export const signIn = async (email, password) => {
-  // Returns { user, error } tuple
-}
-export const onAuthChange = (callback) => {
-  // Subscribe to auth state changes
+### Authentication Flow
+1. Frontend: Call Firebase `signInWithEmailAndPassword()` → receive `id_token`
+2. Frontend: Include `Authorization: Bearer <id_token>` in API requests
+3. Backend: `get_current_user()` validates token via `firebase_admin.auth.verify_id_token()`
+4. Backend: Extract `user_id` from decoded token; use as filter key
+
+**See**: `backend/app/core/auth.py`, `frontend/lib/firebase/auth.ts`
+
+### API Endpoints & Schemas
+- **Router**: `backend/app/api/v1/presentations.py` (CRUD: create, list, get, delete)
+- **Schema** (input): `PresentationCreate` with fields: title, generation_method, topic, slide_count, learning_objectives, etc.
+- **Schema** (response): `PresentationResponse` (all fields + id, user_id, created_at, updated_at)
+- **Model**: `Presentation` (SQLAlchemy ORM) — `slides` is JSON blob; `status` (draft/generating/completed/error); `generation_method` (topic/file/standards)
+
+### Where to Add New Work
+
+**Sync/short tasks**:
+- Add endpoints in `backend/app/api/v1/` → call business logic from `backend/app/services/`
+
+**Async generation** (long-running AI tasks):
+- Implement Celery tasks in `backend/app/workers/` (framework scaffolding exists)
+- Call from API via `apply_async()` or `delay()`
+
+**Frontend API calls**:
+- Implement in `frontend/lib/api/clients.ts` (currently empty) — wrap fetch with auth headers
+- Example: `const headers = { Authorization: Bearer ${getIdToken()} }`
+
+## Testing
+
+- Backend: `pytest` available; add tests under `backend/tests/`
+- Frontend: No test setup yet; consider Jest + React Testing Library for components
+- CI: No GitHub Actions configured; add before merging critical changes
+
+## Known Gaps & Quick Tips
+
+1. **Slide generation service** not yet implemented — add to `backend/app/services/`
+2. **Celery worker** scaffolding present but no tasks defined
+3. **API client** in `frontend/lib/api/clients.ts` is empty — implement fetch wrapper
+4. **Supabase** imports in `package.json` are likely legacy — verify usage before relying on them
+5. **Alembic migrations** directory exists but is empty — use when schema changes require rollback support
+6. If `firebase-credentials.json` missing: backend logs warning; auth will fail. Provide or set env-based credentials.
+
+## Examples
+
+**Create presentation** (POST /api/v1/presentations):
+```json
+{
+  "title": "Photosynthesis 101",
+  "generation_method": "topic",
+  "topic": "Photosynthesis",
+  "slide_count": 5,
+  "grade_level": "6-8",
+  "subject": "Biology"
 }
 ```
 
-**TypeScript**: Strict mode enabled, path alias `@/*` maps to root
+**Request header**:
+```
+Authorization: Bearer <firebase-id-token>
+Content-Type: application/json
+```
 
-## Project-Specific Conventions
+## Jump-To Files
 
-### Presentation Model
-Stored as JSON blobs in PostgreSQL:
-- `slides`: Array of slide objects (structure TBD, likely `[{title, content, layout, notes}]`)
-- `status`: enum-like string (`draft`, `generating`, `completed`, `error`)
-- `generation_method`: `topic`, `file`, or `standards` (determines AI prompt strategy)
-- `learning_objectives`, `standards`: Optional JSON arrays for curriculum alignment
-
-### User Isolation
-All queries filter by `user_id`. No cross-user data access—critical for multi-tenant safety.
-
-### Theme/Styling
-- **Tailwind CSS** for styling (configured in `frontend/tailwind.config.ts`)
-- **Radix UI** + shadcn/ui patterns for accessible components
-- Dark mode support via `next-themes` + `@radix-ui` components
-
-## External Dependencies & Integration Points
-
-### Anthropic API
-- SDK installed: `@anthropic-ai/sdk` (frontend), `anthropic` (backend)
-- Model: Claude Sonnet 4 (configurable in `config.py`: `ANTHROPIC_MODEL`)
-- Max tokens: 4096 (increase for longer presentations)
-- **Usage**: Likely in slide generation service (not yet visible in provided code)
-
-### Firebase
-- **Frontend**: `firebase` SDK for auth, storage, config in `lib/firebase/`
-- **Backend**: `firebase-admin` for token verification, initialized in `core/auth.py`
-- **Credentials**: Path `./firebase-credentials.json` (must be local file or env-injected)
-
-### Supabase (Installed but Unclear Usage)
-- Dependencies present (`@supabase/auth-helpers-nextjs`, `@supabase/supabase-js`)
-- May be legacy or planned—verify actual usage before modifications
-
-### LLM Libraries
-- **tiktoken** (embedding tokenization)
-- **python-pptx** (backend: PowerPoint generation)
-- **Celery** (async task queue, likely for long-running AI generation)
-- **redis** (Celery broker + caching)
-
-## Testing & Validation
-
-- **Backend**: `pytest==7.4.3` available; tests in `/backend/tests/`
-- **Frontend**: No test infrastructure visible; consider adding if new features added
-- **Linting**: No explicit linter config found (consider ESLint, Pylint)
-
-## Known Gaps & TODOs
-
-- Slide content generation AI service not yet implemented in provided code
-- Alembic migration workflow not activated (schema created via `init_db()` only)
-- API client in `frontend/lib/api/clients.ts` is empty—implement request wrapper
-- Supabase imports in package.json but unclear if used; may be legacy
-- File upload handler for "file" generation method not visible
+- Startup: `backend/app/main.py`
+- Config: `backend/app/config.py`
+- Auth: `backend/app/core/auth.py`, `frontend/lib/firebase/auth.ts`
+- Models & Schemas: `backend/app/models/presentation.py`, `backend/app/schemas/presentation.py`
+- API: `backend/app/api/v1/presentations.py`
+- Frontend Firebase: `frontend/lib/firebase/config.ts`
+- Docker: `docker-compose.yml`
 
 ---
 
-**When adding features**: Maintain user isolation via `user_id` filtering, use Pydantic schemas for validation, ensure Firebase token flow, add Radix UI components to `components/ui/` if new primitives needed.
+Feedback? Sections to expand or unclear sections? Let me know.

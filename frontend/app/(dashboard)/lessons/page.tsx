@@ -1,4 +1,4 @@
-// app/tools/Lessons/page.tsx 
+//frontend/app/(dashboard)/lessons/page.tsx
 
 "use client";
 
@@ -6,12 +6,12 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, RefreshCw, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import LessonCard from "@/app/(dashboard)/lessons/lessoncards";
+import LessonCard from "@/app/(dashboard)/lessons/LessonCards";
 import { 
   fetchLessons, 
   handleLessonError,
   type Lesson 
-} from "@/app/tools/Calendar/utils/lessonApi";
+} from "@/lib/api/lesson";
 
 const LessonsPage = () => {
   const router = useRouter();
@@ -49,7 +49,7 @@ const LessonsPage = () => {
       return [];
     }
     // Extract unique segment types (projectName)
-    const types = lesson.segments.map((seg: { projectName: any; }) => seg.projectName);
+    const types = lesson.segments.map((seg) => seg.projectName);
     return Array.from(new Set(types));
   };
 
@@ -158,25 +158,25 @@ const LessonsPage = () => {
         {!isLoading && !error && lessons.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {lessons.map((lesson) => (
-  <LessonCard
-    key={lesson.id}
-    id={lesson.id!}  // ADD THIS LINE
-    title={lesson.title}
-    image="/solarsystem.jpg"
-    segments={getSegmentTypes(lesson)}
-    author={lesson.author || "Unknown"}
-    authorInitials={
-      lesson.author
-        ? lesson.author
-            .split(" ")
-            .map((n: any[]) => n[0])
-            .join("")
-            .toUpperCase()
-        : "?"
-    }
-    updatedDate={formatDate(lesson.updatedAt || lesson.createdAt || lesson.date)}
-  />
-))}
+              <LessonCard
+                key={lesson.id}
+                id={lesson.id!}
+                title={lesson.title}
+                image="/solarsystem.jpg"
+                segments={getSegmentTypes(lesson)}
+                author={lesson.author || "Unknown"}
+                authorInitials={
+                  lesson.author
+                    ? lesson.author
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .toUpperCase()
+                    : "?"
+                }
+                updatedDate={formatDate(lesson.updatedAt || lesson.createdAt || lesson.date)}
+              />
+            ))}
           </div>
         )}
       </div>
