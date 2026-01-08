@@ -4,14 +4,17 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { Menu } from "lucide-react";
 import { EnvVarWarning } from "@/components/env-var-warning";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { 
   SidebarProvider, 
   SidebarInset, 
-  SidebarTrigger 
+  SidebarTrigger,
+  useSidebar
 } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/seperator";
+import { Button } from "@/components/ui/button";
 import { hasEnvVars } from "@/lib/firebase/check-env-vars";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -20,6 +23,33 @@ type ClientLayoutProps = {
   isAuthenticated: boolean;
   isEditorRoute: boolean;
 };
+
+// Custom header component that uses sidebar context
+function LayoutHeader({ isAuthenticated }: { isAuthenticated: boolean }) {
+  const { toggleSidebar } = useSidebar();
+
+  return (
+    <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 bg-background">
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={toggleSidebar}
+        className="-ml-1 h-9 w-9"
+      >
+        <Menu className="h-5 w-5" />
+        <span className="sr-only">Toggle sidebar</span>
+      </Button>
+      <Separator orientation="vertical" className="mr-2 h-4" />
+      
+      {/* Environment warning when not authenticated */}
+      {!isAuthenticated && (
+        <div className="flex-1 flex justify-end">
+          {!hasEnvVars && <EnvVarWarning />}
+        </div>
+      )}
+    </header>
+  );
+}
 
 export default function ClientLayout({ 
   children,
@@ -75,23 +105,8 @@ export default function ClientLayout({
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        {/* Header with sidebar trigger */}
-        {isAuthenticated && (
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-            <SidebarTrigger className="-ml-1" />
-            <Separator orientation="vertical" className="mr-2 h-4" />
-            {/* Navigation content removed */}
-          </header>
-        )}
-        
-        {/* Top Navigation Bar - Only render when not authenticated */}
-        {!isAuthenticated && (
-          <nav className="w-full flex justify-center h-16 sticky top-0 z-10 bg-transparent">
-            <div className="w-full max-w-5xl flex justify-end items-center p-3 px-5 text-sm">
-              {!hasEnvVars && <EnvVarWarning />}
-            </div>
-          </nav>
-        )}
+        {/* Header with custom sidebar toggle button */}
+        <LayoutHeader isAuthenticated={isAuthenticated} />
 
         {/* Main Content */}
         <main className="flex-1 flex flex-col overflow-y-auto">

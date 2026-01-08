@@ -25,9 +25,17 @@ export const metadata: Metadata = {
     statusBarStyle: 'default',
     title: 'Teacher Pro',
   },
+  formatDetection: {
+    telephone: false,
+  },
   icons: {
-    icon: '/icon-192.png',
-    apple: '/icon-192.png',
+    icon: [
+      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/icon-512x512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+    ],
   },
   openGraph: {
     title: "Teacher Pro",
@@ -36,12 +44,13 @@ export const metadata: Metadata = {
   },
 };
 
-// NEW: Separate viewport export for Next.js 15
+// Separate viewport export for Next.js 15
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
-  themeColor: '#3b82f6',
+  userScalable: false,
+  themeColor: '#16a34a',
 };
 
 export default function RootLayout({
@@ -52,8 +61,27 @@ export default function RootLayout({
   return (
     <html lang="en" className={geistSans.className} suppressHydrationWarning>
       <head>
+        {/* PWA Meta Tags */}
         <link rel="manifest" href="/manifest.json" />
-        <link rel="apple-touch-icon" href="/icon-192.png" />
+        <meta name="application-name" content="Teacher Pro" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Teacher Pro" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        
+        {/* Apple Touch Icons */}
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+        <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png" />
+        
+        {/* Favicon */}
+        <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-72x72.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-72x72.png" />
+        
+        {/* Microsoft Tiles */}
+        <meta name="msapplication-TileColor" content="#16a34a" />
+        <meta name="msapplication-tap-highlight" content="no" />
       </head>
       <body className="bg-background text-foreground">
         <ThemeProvider

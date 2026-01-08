@@ -47,14 +47,14 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
+    <Sidebar collapsible="icon" className="bg-background border-r" {...props}>
+      <SidebarHeader className="bg-background">
         <VersionSwitcher
           versions={data.versions}
           defaultVersion={data.versions[0]}
         />
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="bg-background">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
