@@ -1,20 +1,11 @@
-//frontend/app/(dashboard)/layout.tsx
-
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { Menu } from "lucide-react";
 import { EnvVarWarning } from "@/components/env-var-warning";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
+import DashboardHeader from "@/components/home/Dashboardheader";
 import { 
-  SidebarProvider, 
-  SidebarInset, 
-  SidebarTrigger,
-  useSidebar
+  SidebarProvider,
 } from "@/components/ui/sidebar";
-import { Separator } from "@/components/ui/seperator";
-import { Button } from "@/components/ui/button";
 import { hasEnvVars } from "@/lib/firebase/check-env-vars";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -24,54 +15,11 @@ type ClientLayoutProps = {
   isEditorRoute: boolean;
 };
 
-// Custom header component that uses sidebar context
-function LayoutHeader({ isAuthenticated }: { isAuthenticated: boolean }) {
-  const { toggleSidebar } = useSidebar();
-
-  return (
-    <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 bg-background">
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={toggleSidebar}
-        className="-ml-1 h-9 w-9"
-      >
-        <Menu className="h-5 w-5" />
-        <span className="sr-only">Toggle sidebar</span>
-      </Button>
-      <Separator orientation="vertical" className="mr-2 h-4" />
-      
-      {/* Environment warning when not authenticated */}
-      {!isAuthenticated && (
-        <div className="flex-1 flex justify-end">
-          {!hasEnvVars && <EnvVarWarning />}
-        </div>
-      )}
-    </header>
-  );
-}
-
 export default function ClientLayout({ 
   children,
   isAuthenticated,
   isEditorRoute 
 }: ClientLayoutProps) {
-  // Track window width to adjust layout on small screens
-  const [windowWidth, setWindowWidth] = useState(0);
-  
-  // Set up window resize listener
-  useEffect(() => {
-    // Initialize window width
-    setWindowWidth(window.innerWidth);
-    
-    // Update width on resize
-    const handleResize = () => {
-      setWindowWidth(window.innerWidth);
-    };
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   // For editor routes, we don't show the sidebar
   if (isEditorRoute) {
@@ -100,24 +48,27 @@ export default function ClientLayout({
     );
   }
 
-  // For non-editor routes, use the sidebar layout
+  // For non-editor routes, use the sidebar + header layout
   return (
     <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        {/* Header with custom sidebar toggle button */}
-        <LayoutHeader isAuthenticated={isAuthenticated} />
-
-        {/* Main Content */}
-        <main className="flex-1 flex flex-col overflow-y-auto">
-          <div className="flex-1">
+      <div className="flex h-screen w-full overflow-hidden">
+        {/* Sidebar - Fixed width, full height */}
+        <AppSidebar />
+        
+        {/* Main content area - Takes remaining space */}
+        <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+          {/* Header - spans the top of main content */}
+          <DashboardHeader />
+          
+          {/* Scrollable page content */}
+          <main className="flex-1 overflow-y-auto bg-background-light dark:bg-background-dark">
             {children}
-          </div>
-        </main>
+          </main>
 
-        {/* Toast notifications */}
-        <Toaster />
-      </SidebarInset>
+          {/* Toast notifications */}
+          <Toaster />
+        </div>
+      </div>
     </SidebarProvider>
   );
 }

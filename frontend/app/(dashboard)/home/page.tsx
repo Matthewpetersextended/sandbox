@@ -1,31 +1,29 @@
-// app/(dashboard)home/page.tsx
+// frontend/app/%28dashboard%29/home/page.tsx
 
-import Header from '@/components/home/Header'
-import AnnouncementBanner from '@/components/home/Announcementbanner'
-import CreateOptionsCard from '@/components/home/CreateOptionsCard'
-import ResourcesSection from '@/components/home/ResourcesSection'
-import FeedbackButton from '@/components/home/Feedbackbutton'
+"use client"
+
+import QuickActions from "@/components/home/Quickactions"
+import RecentProjects from "@/components/home/Recentprojects"
+import LessonPlannerPromo from "@/components/home/Leassonplannerpromo"
+import DashboardFooter from "@/components/home/Dashboardfooter"
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <Header />
+    <div className="flex flex-col min-h-full bg-background-light dark:bg-background-dark">
+      {/* Main Content Area - Full Width with consistent padding */}
+      <div className="flex-1 px-8 pt-8 pb-8">
+        {/* Quick Actions Section */}
+        <QuickActions />
 
-      {/* Main Content */}
-      <main className="pt-8 pb-16">
-        {/* Announcement Banner */}
-        <AnnouncementBanner />
+        {/* Recent Projects Section */}
+        <RecentProjects />
 
-        {/* Create Options */}
-        <CreateOptionsCard />
+        {/* Lesson Planner Promotional Banner */}
+        <LessonPlannerPromo />
+      </div>
 
-        {/* Resources Section */}
-        <ResourcesSection />
-      </main>
-
-      {/* Feedback Button */}
-      <FeedbackButton />
+      {/* Footer */}
+      <DashboardFooter />
     </div>
   )
 }

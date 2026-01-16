@@ -1,4 +1,4 @@
-// components/dashboard/ResourcesSection.tsx
+// components/home/ResourcesSection.tsx
 
 import { Button } from '@/components/ui/button'
 import { Plus, X } from 'lucide-react'

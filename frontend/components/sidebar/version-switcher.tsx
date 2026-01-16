@@ -1,9 +1,9 @@
-//frontend/components/sidebar/version-switcher.tsx
+// components/sidebar/version-switcher.tsx
 
 "use client"
 
 import * as React from "react"
-import { Check, ChevronsUpDown, GalleryVerticalEnd } from "lucide-react"
+import { Check, ChevronsUpDown } from "lucide-react"
 
 import {
   DropdownMenu,
@@ -33,29 +33,38 @@ export function VersionSwitcher({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground hover:bg-sidebar-accent"
             >
-              <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                <GalleryVerticalEnd className="size-4" />
+              <div className="bg-primary text-white flex aspect-square size-8 items-center justify-center rounded-lg">
+                <span className="material-symbols-outlined text-[20px]">
+                  auto_awesome
+                </span>
               </div>
               <div className="flex flex-col gap-0.5 leading-none">
-                <span className="font-medium">Documentation</span>
-                <span className="">v{selectedVersion}</span>
+                <span className="font-bold text-[#0d101b] dark:text-white text-base">
+                  Sandbox
+                </span>
+                <span className="text-xs text-sage-600 dark:text-emerald-400">
+                  v{selectedVersion}
+                </span>
               </div>
-              <ChevronsUpDown className="ml-auto" />
+              <ChevronsUpDown className="ml-auto size-4 text-sage-600 dark:text-emerald-400" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width)"
+            className="w-[--radix-dropdown-menu-trigger-width]"
             align="start"
           >
             {versions.map((version) => (
               <DropdownMenuItem
                 key={version}
                 onSelect={() => setSelectedVersion(version)}
+                className="cursor-pointer"
               >
-                v{version}{" "}
-                {version === selectedVersion && <Check className="ml-auto" />}
+                <span className="flex-1">v{version}</span>
+                {version === selectedVersion && (
+                  <Check className="ml-auto size-4 text-primary" />
+                )}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
