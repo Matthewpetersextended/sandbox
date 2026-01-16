@@ -1,4 +1,4 @@
-//frontend/app/(dashboard)/lessons/page.tsx
+// frontend/app/(dashboard)/lessons/page.tsx
 
 "use client";
 
@@ -83,7 +83,7 @@ const LessonsPage = () => {
             </p>
           </div>
           <Button
-            onClick={() => router.push("/tools/Lessons/create")}
+            onClick={() => router.push("/lessons/create")}
             size="lg"
             className="gap-2 px-6 h-12 text-base font-semibold bg-green-600 hover:bg-green-700 text-white"
           >
@@ -145,7 +145,7 @@ const LessonsPage = () => {
               Get started by creating your first lesson
             </p>
             <Button
-              onClick={() => router.push("/tools/Lessons/create")}
+              onClick={() => router.push("/lessons/create")}
               className="gap-2 bg-green-600 hover:bg-green-700 text-white"
             >
               <Plus className="w-4 h-4" />
